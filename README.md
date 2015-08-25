@@ -1,5 +1,5 @@
 # S3O-middleware
-Middleware to handle authenticating with S3O
+Middleware to handle authenticating with [S3O](http://s3o.ft.com/docs)
 
 ## Environment requirements
 Requires an environment key `S3O_PUBLIC_KEY` to be set with the [public key for S3O](https://s3o.ft.com/publickey)
