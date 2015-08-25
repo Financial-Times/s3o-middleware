@@ -1,0 +1,29 @@
+{
+  "name": "s3o-middleware",
+  "version": "1.0.0",
+  "description": "Authenticate with S3O via middleware",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Financial-Times/S3O-middleware.git"
+  },
+  "keywords": [
+    "express",
+    "s3o",
+    "middleware",
+    "ft"
+  ],
+  "author": "Jake Champion",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Financial-Times/S3O-middleware/issues"
+  },
+  "homepage": "https://github.com/Financial-Times/S3O-middleware#readme",
+  "dependencies": {
+    "debug": "^2.2.0",
+    "node-rsa": "^0.2.25"
+  }
+}
