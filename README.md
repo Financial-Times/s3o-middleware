@@ -4,7 +4,7 @@ Middleware to handle authenticating with S3O
 
 ## Usage example for Express
 If many routes require auth:
-```
+```js
 var express = require('express');
 var app = express();
 
@@ -14,7 +14,7 @@ app.use(authS3O);
 // Add routes here which require auth
 ```
 If only one route requires auth:
-```
+```js
 var express = require('express');
 var app = express();
 var router = express.Router();
