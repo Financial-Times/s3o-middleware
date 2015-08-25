@@ -2,7 +2,7 @@
 Middleware to handle authenticating with S3O
 
 ## Environment requirements
-Requires an environment key `S3O_PUBLIC_KEY` to be set with the [public key for s3o](https://s3o.ft.com/publickey)
+Requires an environment key `S3O_PUBLIC_KEY` to be set with the [public key for S3O](https://s3o.ft.com/publickey)
 
 One way to do this would be using [dotenv](https://www.npmjs.com/package/dotenv) and adding the `.env` file to your `.gitignore` file.
 
