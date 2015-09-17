@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/Financial-Times/S3O-middleware#readme",
   "dependencies": {
+    "cookie-parser": "^1.3.5",
     "debug": "^2.2.0",
     "node-rsa": "^0.2.25"
   }
