@@ -7,6 +7,7 @@ var debug = require('debug')('middleware:auth:s3o');
 var crypto = require('crypto');
 var NodeRSA = require("node-rsa");
 var url = require('url');
+var cookieParser = require('cookie').parse;
 
 if (!process.env.S3O_PUBLIC_KEY) {
 	throw new Error('Requires S3O_PUBLIC_KEY to be set');
@@ -48,6 +49,15 @@ var authenticateToken = function(res, username, token) {
 
 var authS3O = function(req, res, next) {
 	debug("S3O: Start.");
+
+	if (req.cookies === undefined || req.cookies === null) {
+		var cookies = req.headers.cookie;
+	    if (cookies) {
+			req.cookies = cookie.parse(cookies, options);
+	    } else {
+			req.cookies = Object.create(null);
+	    }
+	}
 
 	// Check for s3o username/token URL parameters.
 	// These parameters come from https://s3o.ft.com. It redirects back after it does the google authentication.
