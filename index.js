@@ -53,7 +53,7 @@ var authS3O = function(req, res, next) {
 	if (req.cookies === undefined || req.cookies === null) {
 		var cookies = req.headers.cookie;
 	    if (cookies) {
-			req.cookies = cookie.parse(cookies, options);
+			req.cookies = cookieParser(cookies);
 	    } else {
 			req.cookies = Object.create(null);
 	    }
