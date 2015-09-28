@@ -25,6 +25,7 @@
   "dependencies": {
     "cookie": "^0.2.2",
     "debug": "^2.2.0",
+    "ft-poller": "^2.1.0",
     "node-rsa": "^0.2.25"
   }
 }
