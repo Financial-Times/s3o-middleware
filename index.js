@@ -8,14 +8,15 @@ var crypto = require('crypto');
 var NodeRSA = require("node-rsa");
 var url = require('url');
 var cookieParser = require('cookie').parse;
-
-if (!process.env.S3O_PUBLIC_KEY) {
-	throw new Error('Requires S3O_PUBLIC_KEY to be set');
-}
+var s3oPublicKey = require('./lib/publickey');
 
 // Authenticate token and save/delete cookies as appropriate.
 var authenticateToken = function(res, username, token) {
-	var publicKey = process.env.S3O_PUBLIC_KEY;
+	var publicKey = s3oPublicKey();
+	if (!publicKey) {
+		res.status(500).send("Has not yet downloaded public key from S3O");
+		return;
+	}
 
 	// Convert the publicKey from DER format to PEM format
 	// See: https://www.npmjs.com/package/node-rsa
