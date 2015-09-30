@@ -7,8 +7,6 @@ This middleware can parse standard cookies via the [cookie](http://npmjs.com/pac
 ## Usage example for Express
 If many routes require auth:
 ```js
-// load our environment variables
-require('dotenv').load();
 var express = require('express');
 var app = express();
 
