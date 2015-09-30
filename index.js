@@ -80,8 +80,7 @@ var authS3O = function(req, res, next) {
 			res.header("Cache-Control", "no-cache, no-store, must-revalidate");
 			res.header("Pragma", "no-cache");
 			res.header("Expires", 0);
-
-			next();
+			res.redirect(url.format(cleanURL));
 		}
 	}
 	// Check for s3o username/token cookies
