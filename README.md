@@ -17,8 +17,6 @@ app.use(authS3O);
 ```
 If only one route requires auth:
 ```js
-// load our environment variables
-require('dotenv').load();
 var express = require('express');
 var app = express();
 var router = express.Router();
