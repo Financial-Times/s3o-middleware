@@ -77,7 +77,7 @@ var authS3O = function(req, res, next) {
 			debug("S3O: " + JSON.stringify(req.path));
 
 			// Don't cache any redirection responses.
-			res.header("Cache-Control", "no-cache, no-store, must-revalidate");
+			res.header("Cache-Control", "private, no-cache, no-store, must-revalidate");
 			res.header("Pragma", "no-cache");
 			res.header("Expires", 0);
 			res.redirect(url.format(cleanURL));
@@ -99,7 +99,7 @@ var authS3O = function(req, res, next) {
 		debug("S3O: No token/s3o_username found. Redirecting to " + s3o_url);
 
 		// Don't cache any redirection responses.
-		res.header("Cache-Control", "no-cache, no-store, must-revalidate");
+		res.header("Cache-Control", "private, no-cache, no-store, must-revalidate");
 		res.header("Pragma", "no-cache");
 		res.header("Expires", 0);
 		return res.redirect(s3o_url);
