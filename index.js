@@ -9,9 +9,13 @@ var NodeRSA = require("node-rsa");
 var url = require('url');
 var cookieParser = require('cookie').parse;
 var s3oPublicKey = require('./lib/publickey');
+var urlencoded = require('body-parser').urlencoded();
 
 // Authenticate token and save/delete cookies as appropriate.
-var authenticateToken = function(res, username, token) {
+var authenticateToken = function(res, username, hostname, token) {
+	console.log("About to use username and token");
+	console.log(username);
+	console.log(token);
 	var publicKey = s3oPublicKey();
 	if (!publicKey) {
 		res.status(500).send("Has not yet downloaded public key from S3O");
@@ -26,7 +30,7 @@ var authenticateToken = function(res, username, token) {
 
 	// See: https://nodejs.org/api/crypto.html
 	var verifier = crypto.createVerify("sha1");
-	verifier.update(username);
+	verifier.update(username + '-' + hostname);
 	var result = verifier.verify(publicPem, token, "base64");
 
 	if (result) {
@@ -43,7 +47,6 @@ var authenticateToken = function(res, username, token) {
 		debug("S3O: Authentication failed: " + username);
 		res.clearCookie('s3o_username');
 		res.clearCookie('s3o_token');
-		res.send("<h1>Authentication error.</h1><p>For access, please login with your FT account</p>");
 		return false;
 	}
 };
@@ -53,49 +56,57 @@ var authS3O = function(req, res, next) {
 
 	if (req.cookies === undefined || req.cookies === null) {
 		var cookies = req.headers.cookie;
-	    if (cookies) {
+		if (cookies) {
 			req.cookies = cookieParser(cookies);
-	    } else {
+		} else {
 			req.cookies = Object.create(null);
-	    }
+		}
 	}
 
 	// Check for s3o username/token URL parameters.
 	// These parameters come from https://s3o.ft.com. It redirects back after it does the google authentication.
-	if (req.query.username && req.query.token) {
-		debug("S3O: Found parameter token for s3o_username: " + req.query.username);
+	if (req.method === 'POST' && req.query.username) {
+		urlencoded(req, res, function() {
+				debug("S3O: Found parameter token for s3o_username: " + req.query.username);
 
-		if (authenticateToken(res, req.query.username, req.query.token)) {
+				if (authenticateToken(res, req.query.username, req.hostname, req.body.token)) {
 
-			// Strip the username and token from the URL (but keep any other parameters)
-			delete req.query['username'];
-			delete req.query['token'];
-			var cleanURL = url.parse(req.path);
-			cleanURL.query = req.query;
+					// Strip the username and token from the URL (but keep any other parameters)
+					delete req.query['username'];
+					delete req.query['token'];
+					var cleanURL = url.parse(req.path);
+					cleanURL.query = req.query;
 
-			debug("S3O: Parameters detected in URL. Redirecting to base path: " + url.format(cleanURL));
-			debug("S3O: " + JSON.stringify(req.path));
+					debug("S3O: Parameters detected in URL and body. Redirecting to base path: " + url.format(cleanURL));
+					debug("S3O: " + JSON.stringify(req.path));
 
-			// Don't cache any redirection responses.
-			res.header("Cache-Control", "private, no-cache, no-store, must-revalidate");
-			res.header("Pragma", "no-cache");
-			res.header("Expires", 0);
-			res.redirect(url.format(cleanURL));
-		}
+					// Don't cache any redirection responses.
+					res.header("Cache-Control", "private, no-cache, no-store, must-revalidate");
+					res.header("Pragma", "no-cache");
+					res.header("Expires", 0);
+					res.redirect(url.format(cleanURL));
+				} else {
+					res.status(403);
+					res.send("<h1>Authentication error.</h1><p>For access, please login with your FT account</p>");
+				}
+			});
 	}
 	// Check for s3o username/token cookies
 	else if (req.cookies.s3o_username && req.cookies.s3o_token) {
 		debug("S3O: Found cookie token for s3o_username: " + req.cookies.s3o_username);
 
-		if (authenticateToken(res, req.cookies.s3o_username, req.cookies.s3o_token)) {
+		if (authenticateToken(res, req.cookies.s3o_username, req.hostname, req.cookies.s3o_token)) {
 			next();
+		} else {
+			res.status(403);
+			res.send("<h1>Authentication error.</h1><p>For access, please login with your FT account</p>");
 		}
 	}
 	else {
 
 		// Send the user to s3o to authenticate
 		var protocol = (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === "https") ? "https" : req.protocol;
-		var s3o_url = "https://s3o.ft.com/authenticate?redirect=" + encodeURIComponent(protocol + "://" + req.headers.host + req.originalUrl);
+		var s3o_url = "http://test-s3o.ft.com/v2/authenticate?post=true&host=" + encodeURIComponent(req.hostname) + "&redirect=" + encodeURIComponent(protocol + "://" + req.headers.host + req.originalUrl);
 		debug("S3O: No token/s3o_username found. Redirecting to " + s3o_url);
 
 		// Don't cache any redirection responses.
