@@ -95,7 +95,7 @@ var authS3O = function(req, res, next) {
 
 		// Send the user to s3o to authenticate
 		var protocol = (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === "https") ? "https" : req.protocol;
-		var s3o_url = "https://s3o.ft.com/authenticate?redirect=" + encodeURIComponent(protocol + "://" + req.headers.host + req.url);
+		var s3o_url = "https://s3o.ft.com/authenticate?redirect=" + encodeURIComponent(protocol + "://" + req.headers.host + req.originalUrl);
 		debug("S3O: No token/s3o_username found. Redirecting to " + s3o_url);
 
 		// Don't cache any redirection responses.
