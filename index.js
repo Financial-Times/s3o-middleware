@@ -13,9 +13,6 @@ var urlencoded = require('body-parser').urlencoded();
 
 // Authenticate token and save/delete cookies as appropriate.
 var authenticateToken = function(res, username, hostname, token) {
-	console.log("About to use username and token");
-	console.log(username);
-	console.log(token);
 	var publicKey = s3oPublicKey();
 	if (!publicKey) {
 		res.status(500).send("Has not yet downloaded public key from S3O");
