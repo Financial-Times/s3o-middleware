@@ -44,6 +44,7 @@ var authenticateToken = function(res, username, hostname, token) {
 		debug("S3O: Authentication failed: " + username);
 		res.clearCookie('s3o_username');
 		res.clearCookie('s3o_token');
+		res.status(403);
 		return false;
 	}
 };
@@ -83,7 +84,6 @@ var authS3O = function(req, res, next) {
 					res.header("Expires", 0);
 					res.redirect(url.format(cleanURL));
 				} else {
-					res.status(403);
 					res.send("<h1>Authentication error.</h1><p>For access, please login with your FT account</p>");
 				}
 			});
@@ -95,7 +95,6 @@ var authS3O = function(req, res, next) {
 		if (authenticateToken(res, req.cookies.s3o_username, req.hostname, req.cookies.s3o_token)) {
 			next();
 		} else {
-			res.status(403);
 			res.send("<h1>Authentication error.</h1><p>For access, please login with your FT account</p>");
 		}
 	}
