@@ -70,13 +70,14 @@ var authS3O = function(req, res, next) {
 				if (authenticateToken(res, req.query.username, req.hostname, req.body.token)) {
 
 					// Strip the username and token from the URL (but keep any other parameters)
-					delete req.query['username'];
-					delete req.query['token'];
-					var cleanURL = url.parse(req.path);
-					cleanURL.query = req.query;
+					// Set 2nd parameter to true to parse the query string (so we can easily delete ?username=)
+					var cleanURL = url.parse(req.originalUrl, true);
+
+					// Node prefers ‘search’ over ‘query’ so remove ‘search’
+					delete cleanURL.search;
+					delete cleanURL.query.username;
 
 					debug("S3O: Parameters detected in URL and body. Redirecting to base path: " + url.format(cleanURL));
-					debug("S3O: " + JSON.stringify(req.path));
 
 					// Don't cache any redirection responses.
 					res.header("Cache-Control", "private, no-cache, no-store, must-revalidate");
