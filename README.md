@@ -15,7 +15,7 @@ var authS3O = require('s3o-middleware');
 app.use(authS3O);
 // Add routes here which require auth
 ```
-If only one route requires auth:
+If only paths within a given directory require auth:
 ```js
 var express = require('express');
 var app = express();
@@ -23,4 +23,14 @@ var router = express.Router();
 var authS3O = require('s3o-middleware');
 router.use(authS3O);
 app.use('/admin', router);
+```
+If specific paths require auth:
+```js
+var express = require('express');
+var app = express();
+var router = express.Router();
+var authS3O = require('s3o-middleware');
+
+app.get('/', authS3O, router);
+app.post('/', authS3O);
 ```
