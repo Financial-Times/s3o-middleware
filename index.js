@@ -5,7 +5,7 @@
 
 var debug = require('debug')('middleware:auth:s3o');
 var url = require('url');
-var decrypt = require('./lib/decrypt');
+var validate = require('./lib/validate');
 var cookieParser = require('cookie').parse;
 var s3oPublicKey = require('./lib/publickey');
 var urlencoded = require('body-parser').urlencoded();
@@ -18,7 +18,7 @@ var authenticateToken = function (res, username, hostname, token) {
 		return false;
 	}
 	var key = username + '-' + hostname;
-	var result = decrypt(key, token);
+	var result = validate(key, token);
 
 	if (result) {
 		debug('S3O: Authentication successful: ' + username);
@@ -102,4 +102,4 @@ var authS3O = function (req, res, next) {
 };
 
 module.exports = authS3O;
-module.exports.decrypt = decrypt;
+module.exports.validate = validate;
