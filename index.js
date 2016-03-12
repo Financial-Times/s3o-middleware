@@ -5,9 +5,9 @@
 
 var debug = require('debug')('middleware:auth:s3o');
 var url = require('url');
-var validate = require('./lib/validate');
 var cookieParser = require('cookie').parse;
-var s3oPublicKey = require('./lib/publickey');
+var s3oPublicKey = require('./lib/publickey')(debug);
+var validate = require('./lib/validate')(s3oPublicKey);
 var urlencoded = require('body-parser').urlencoded({extended: true});
 
 // Authenticate token and save/delete cookies as appropriate.
