@@ -103,4 +103,5 @@ var authS3O = function (req, res, next) {
 
 module.exports = authS3O;
 module.exports.validate = validate;
-module.exports.ready = s3oPublicKey({ promise: true }).then(() => true);
+module.exports.ready = s3oPublicKey({ promise: true })
+	.then(function() { return true; });
