@@ -11,7 +11,7 @@ var validate = require('./lib/validate')(s3oPublicKey);
 var urlencoded = require('body-parser').urlencoded({extended: true});
 
 // Authenticate token and save/delete cookies as appropriate.
-var authenticateToken = function (res, username, hostname, token) {
+var authenticateToken = function (req, res, username, hostname, token) {
 	var publicKey = s3oPublicKey();
 	if (!publicKey) {
 		res.status(500).send('Has not yet downloaded public key from S3O');
@@ -22,6 +22,9 @@ var authenticateToken = function (res, username, hostname, token) {
 
 	if (result) {
 		debug('S3O: Authentication successful: ' + username);
+
+		// Add username to request, so apps can utilise it.
+		req.s3o_username = username;
 		var cookieOptions = {
 			maxAge: 900000,
 			httpOnly: true
@@ -55,7 +58,7 @@ var authS3O = function (req, res, next) {
 		urlencoded(req, res, function () {
 				debug('S3O: Found parameter token for s3o_username: ' + req.query.username);
 
-				if (authenticateToken(res, req.query.username, req.hostname, req.body.token)) {
+				if (authenticateToken(req, res, req.query.username, req.hostname, req.body.token)) {
 
 					// Strip the username and token from the URL (but keep any other parameters)
 					// Set 2nd parameter to true to parse the query string (so we can easily delete ?username=)
@@ -81,7 +84,7 @@ var authS3O = function (req, res, next) {
 	} else if (req.cookies.s3o_username && req.cookies.s3o_token) {
 		debug('S3O: Found cookie token for s3o_username: ' + req.cookies.s3o_username);
 
-		if (authenticateToken(res, req.cookies.s3o_username, req.hostname, req.cookies.s3o_token)) {
+		if (authenticateToken(req, res, req.cookies.s3o_username, req.hostname, req.cookies.s3o_token)) {
 			next();
 		} else {
 			res.send('<h1>Authentication error.</h1><p>For access, please login with your FT account</p>');
