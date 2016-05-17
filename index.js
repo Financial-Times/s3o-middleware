@@ -22,6 +22,9 @@ var authenticateToken = function (res, username, hostname, token) {
 
 	if (result) {
 		debug('S3O: Authentication successful: ' + username);
+
+		// Add username to res.locals, so apps can utilise it.
+		res.locals.s3o_username = username;
 		var cookieOptions = {
 			maxAge: 900000,
 			httpOnly: true
