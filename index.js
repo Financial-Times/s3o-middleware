@@ -26,7 +26,7 @@ var authenticateToken = function (res, username, hostname, token) {
 		// Add username to res.locals, so apps can utilise it.
 		res.locals.s3o_username = username;
 		var cookieOptions = {
-			maxAge: 900000,
+			maxAge: res.app.get('s3o-cookie-ttl') || 900000,
 			httpOnly: true
 		};
 		res.cookie('s3o_username', username, cookieOptions);
