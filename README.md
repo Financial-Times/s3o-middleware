@@ -7,6 +7,10 @@ This middleware can parse standard cookies via the [cookie](http://npmjs.com/pac
 # Finding the username of the logged in user
 The username is added to the 's3o_username' property of the res.locals object for all authenticated requests.
 
+# Setting the ttl of the cookie for an authenticated request
+Defaults to fifteen minutes. Use Express' `app.set` function before sending users to authenticate:
+`app.set('s3o-cookie-ttl', 86400000); // one day (in ms)`
+
 ## Usage example for Express
 If many routes require auth:
 ```js
