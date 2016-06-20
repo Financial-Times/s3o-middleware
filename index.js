@@ -40,9 +40,7 @@ var authenticateToken = function (res, username, hostname, token) {
 	return false;
 };
 
-var authS3O = function (req, res, next) {
-	debug('S3O: Start.');
-
+var normaliseRequestCookies = function(req) {
 	if (req.cookies === undefined || req.cookies === null) {
 		var cookies = req.headers.cookie;
 		if (cookies) {
@@ -51,6 +49,12 @@ var authS3O = function (req, res, next) {
 			req.cookies = Object.create(null);
 		}
 	}
+}
+
+var authS3O = function (req, res, next) {
+	debug('S3O: Start.');
+
+	normaliseRequestCookies(req);
 
 	// Check for s3o username/token URL parameters.
 	// These parameters come from https://s3o.ft.com. It redirects back after it does the google authentication.
@@ -110,14 +114,7 @@ var authS3O = function (req, res, next) {
 var authS3ONoRedirect = function (req, res, next) {
 	debug('S3O: Start.');
 
-	if (req.cookies === undefined || req.cookies === null) {
-		var cookies = req.headers.cookie;
-		if (cookies) {
-			req.cookies = cookieParser(cookies);
-		} else {
-			req.cookies = Object.create(null);
-		}
-	}
+	normaliseRequestCookies(req);
 
 	if (req.cookies.s3o_username && req.cookies.s3o_token && authenticateToken(res, req.cookies.s3o_username, req.hostname, req.cookies.s3o_token)) {
 		debug('S3O: Authentication succeeded');
