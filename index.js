@@ -40,9 +40,7 @@ var authenticateToken = function (res, username, hostname, token) {
 	return false;
 };
 
-var authS3O = function (req, res, next) {
-	debug('S3O: Start.');
-
+var normaliseRequestCookies = function(req) {
 	if (req.cookies === undefined || req.cookies === null) {
 		var cookies = req.headers.cookie;
 		if (cookies) {
@@ -51,6 +49,12 @@ var authS3O = function (req, res, next) {
 			req.cookies = Object.create(null);
 		}
 	}
+}
+
+var authS3O = function (req, res, next) {
+	debug('S3O: Start.');
+
+	normaliseRequestCookies(req);
 
 	// Check for s3o username/token URL parameters.
 	// These parameters come from https://s3o.ft.com. It redirects back after it does the google authentication.
@@ -104,7 +108,30 @@ var authS3O = function (req, res, next) {
 	}
 };
 
+// Alternative authentication middleware which does not redirect to S3O when
+// cookies are missing or invalid. This can be used in front of API calls
+// where a redirect will be undesirable
+var authS3ONoRedirect = function (req, res, next) {
+	debug('S3O: Start.');
+
+	normaliseRequestCookies(req);
+
+	if (req.cookies.s3o_username && req.cookies.s3o_token && authenticateToken(res, req.cookies.s3o_username, req.hostname, req.cookies.s3o_token)) {
+		debug('S3O: Authentication succeeded');
+		return next();
+	};
+
+	debug('S3O: Authentication failed');
+	res.clearCookie('s3o_username');
+	res.clearCookie('s3o_token');
+	res.status(403);
+	res.send('Forbidden');
+	return false;
+}
+
+
 module.exports = authS3O;
+module.exports.authS3ONoRedirect = authS3ONoRedirect;
 module.exports.validate = validate;
 module.exports.ready = s3oPublicKey({ promise: true })
 	.then(function() { return true; });
