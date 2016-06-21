@@ -45,7 +45,7 @@ app.post('/', authS3O);
 If you don't want the automatic redirect to the S3O login page, use the
 `authS3ONoRedirect` middleware. This could be because you want to protect an
 API endpoint for authenticated AJAX requests, for example. If the
-cookies are not present or are invalid, the `authS3ONoRedirect` 
+cookies are not present or are invalid, the `authS3ONoRedirect`
 middleware will respond with a simple `403: Forbidden` response:
 
 ```js
@@ -54,5 +54,5 @@ var app = express();
 var router = express.Router();
 var authS3ONoRedirect = require('s3o-middleware').authS3ONoRedirect;
 
-app.get('/some-athenticated-api', authS3ONoRedirect, router);
+app.get('/some-authenticated-api', authS3ONoRedirect, router);
 ```
