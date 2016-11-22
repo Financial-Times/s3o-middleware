@@ -63,7 +63,6 @@ let authS3O = function (req, res, next) {
 				debug('S3O: Found parameter token for s3o_username: ' + req.query.username);
 
 				if (authenticateToken(res, req.query.username, req.hostname, req.body.token)) {
-
 					// Strip the username and token from the URL (but keep any other parameters)
 					// Set 2nd parameter to true to parse the query string (so we can easily delete ?username=)
 					let cleanURL = url.parse(req.originalUrl, true);
