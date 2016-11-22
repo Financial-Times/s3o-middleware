@@ -3,29 +3,29 @@
 //  — It's intended to change sporadically and without warning, mainly for security testing.
 //  — Currently it comes in DER format and needs to be converted to PEM format
 
-var debug = require('debug')('middleware:auth:s3o');
-var url = require('url');
-var cookieParser = require('cookie').parse;
-var s3oPublicKey = require('./lib/publickey')(debug);
-var validate = require('./lib/validate')(s3oPublicKey);
-var urlencoded = require('body-parser').urlencoded({extended: true});
+let debug = require('debug')('middleware:auth:s3o');
+let url = require('url');
+let cookieParser = require('cookie').parse;
+let s3oPublicKey = require('./lib/publickey')(debug);
+let validate = require('./lib/validate')(s3oPublicKey);
+let urlencoded = require('body-parser').urlencoded({extended: true});
 
 // Authenticate token and save/delete cookies as appropriate.
-var authenticateToken = function (res, username, hostname, token) {
-	var publicKey = s3oPublicKey();
+let authenticateToken = function (res, username, hostname, token) {
+	let publicKey = s3oPublicKey();
 	if (!publicKey) {
 		res.status(500).send('Has not yet downloaded public key from S3O');
 		return false;
 	}
-	var key = username + '-' + hostname;
-	var result = validate(key, token);
+	let key = username + '-' + hostname;
+	let result = validate(key, token);
 
 	if (result) {
 		debug('S3O: Authentication successful: ' + username);
 
 		// Add username to res.locals, so apps can utilise it.
 		res.locals.s3o_username = username;
-		var cookieOptions = {
+		let cookieOptions = {
 			maxAge: res.app.get('s3o-cookie-ttl') || 900000,
 			httpOnly: true
 		};
@@ -40,9 +40,9 @@ var authenticateToken = function (res, username, hostname, token) {
 	return false;
 };
 
-var normaliseRequestCookies = function(req) {
+let normaliseRequestCookies = function (req) {
 	if (req.cookies === undefined || req.cookies === null) {
-		var cookies = req.headers.cookie;
+		let cookies = req.headers.cookie;
 		if (cookies) {
 			req.cookies = cookieParser(cookies);
 		} else {
@@ -51,7 +51,7 @@ var normaliseRequestCookies = function(req) {
 	}
 }
 
-var authS3O = function (req, res, next) {
+let authS3O = function (req, res, next) {
 	debug('S3O: Start.');
 
 	normaliseRequestCookies(req);
@@ -66,7 +66,7 @@ var authS3O = function (req, res, next) {
 
 					// Strip the username and token from the URL (but keep any other parameters)
 					// Set 2nd parameter to true to parse the query string (so we can easily delete ?username=)
-					var cleanURL = url.parse(req.originalUrl, true);
+					let cleanURL = url.parse(req.originalUrl, true);
 
 					// Node prefers ‘search’ over ‘query’ so remove ‘search’
 					delete cleanURL.search;
@@ -96,8 +96,8 @@ var authS3O = function (req, res, next) {
 
 	// Send the user to s3o to authenticate
 	} else {
-		var protocol = (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === 'https') ? 'https' : req.protocol;
-		var s3o_url = 'https://s3o.ft.com/v2/authenticate?post=true&host=' + encodeURIComponent(req.hostname) + '&redirect=' + encodeURIComponent(protocol + '://' + req.headers.host + req.originalUrl);
+		let protocol = (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === 'https') ? 'https' : req.protocol;
+		let s3o_url = 'https://s3o.ft.com/v2/authenticate?post=true&host=' + encodeURIComponent(req.hostname) + '&redirect=' + encodeURIComponent(protocol + '://' + req.headers.host + req.originalUrl);
 		debug('S3O: No token/s3o_username found. Redirecting to ' + s3o_url);
 
 		// Don't cache any redirection responses.
@@ -111,7 +111,7 @@ var authS3O = function (req, res, next) {
 // Alternative authentication middleware which does not redirect to S3O when
 // cookies are missing or invalid. This can be used in front of API calls
 // where a redirect will be undesirable
-var authS3ONoRedirect = function (req, res, next) {
+let authS3ONoRedirect = function (req, res, next) {
 	debug('S3O: Start.');
 
 	normaliseRequestCookies(req);
@@ -134,4 +134,4 @@ module.exports = authS3O;
 module.exports.authS3ONoRedirect = authS3ONoRedirect;
 module.exports.validate = validate;
 module.exports.ready = s3oPublicKey({ promise: true })
-	.then(function() { return true; });
+	.then(function () { return true; });

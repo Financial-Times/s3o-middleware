@@ -28,5 +28,8 @@
     "debug": "^2.2.0",
     "ft-poller": "^2.1.0",
     "node-rsa": "^0.2.25"
+  },
+  "devDependencies": {
+    "eslint": "^3.10.2"
   }
 }
