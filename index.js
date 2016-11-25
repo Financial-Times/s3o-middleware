@@ -3,53 +3,11 @@
 //  — It's intended to change sporadically and without warning, mainly for security testing.
 //  — Currently it comes in DER format and needs to be converted to PEM format
 
-let debug = require('debug')('middleware:auth:s3o');
-let url = require('url');
-let cookieParser = require('cookie').parse;
-let s3oPublicKey = require('./lib/publickey')(debug);
-let validate = require('./lib/validate')(s3oPublicKey);
-let urlencoded = require('body-parser').urlencoded({extended: true});
-
-// Authenticate token and save/delete cookies as appropriate.
-let authenticateToken = function (res, username, hostname, token) {
-	let publicKey = s3oPublicKey();
-	if (!publicKey) {
-		res.status(500).send('Has not yet downloaded public key from S3O');
-		return false;
-	}
-	let key = username + '-' + hostname;
-	let result = validate(key, token);
-
-	if (result) {
-		debug('S3O: Authentication successful: ' + username);
-
-		// Add username to res.locals, so apps can utilise it.
-		res.locals.s3o_username = username;
-		let cookieOptions = {
-			maxAge: res.app.get('s3o-cookie-ttl') || 8 * 60 * 60 * 1000,
-			httpOnly: true
-		};
-		res.cookie('s3o_username', username, cookieOptions);
-		res.cookie('s3o_token', token, cookieOptions);
-		return true;
-	}
-	debug('S3O: Authentication failed: ' + username);
-	res.clearCookie('s3o_username');
-	res.clearCookie('s3o_token');
-	res.status(403);
-	return false;
-};
-
-let normaliseRequestCookies = function (req) {
-	if (req.cookies === undefined || req.cookies === null) {
-		let cookies = req.headers.cookie;
-		if (cookies) {
-			req.cookies = cookieParser(cookies);
-		} else {
-			req.cookies = Object.create(null);
-		}
-	}
-}
+const debug = require('debug')('middleware:auth:s3o');
+const url = require('url');
+const urlencoded = require('body-parser').urlencoded({extended: true});
+const { authenticateToken, validate, s3oPublicKeyPromise } = require('s3o-middleware-utils/authenticate');
+const { normaliseRequestCookies, setCookies, clearCookies } = require('s3o-middleware-utils/cookies');
 
 let authS3O = function (req, res, next) {
 	debug('S3O: Start.');
@@ -61,8 +19,16 @@ let authS3O = function (req, res, next) {
 	if (req.method === 'POST' && req.query.username) {
 		urlencoded(req, res, function () {
 				debug('S3O: Found parameter token for s3o_username: ' + req.query.username);
+				let isAuthenticated;
+				try {
+					isAuthenticated = authenticateToken(req.query.username, req.hostname, req.body.token);
+				} catch (e) {
+					res.status(500).send(e);
+					return;
+				}
 
-				if (authenticateToken(res, req.query.username, req.hostname, req.body.token)) {
+				if (isAuthenticated) {
+					setCookies(res, req.query.username, req.body.token);
 					// Strip the username and token from the URL (but keep any other parameters)
 					// Set 2nd parameter to true to parse the query string (so we can easily delete ?username=)
 					let cleanURL = url.parse(req.originalUrl, true);
@@ -79,6 +45,8 @@ let authS3O = function (req, res, next) {
 					res.header('Expires', 0);
 					res.redirect(url.format(cleanURL));
 				} else {
+					clearCookies(res);
+					res.status(403);
 					res.send('<h1>Authentication error.</h1><p>For access, please login with your FT account</p>');
 				}
 			});
@@ -87,7 +55,15 @@ let authS3O = function (req, res, next) {
 	} else if (req.cookies.s3o_username && req.cookies.s3o_token) {
 		debug('S3O: Found cookie token for s3o_username: ' + req.cookies.s3o_username);
 
-		if (authenticateToken(res, req.cookies.s3o_username, req.hostname, req.cookies.s3o_token)) {
+		let isAuthenticated;
+		try {
+			isAuthenticated = authenticateToken(req.cookies.s3o_username, req.hostname, req.cookies.s3o_token);
+		} catch(e) {
+			res.status(500).send(e);
+			return;
+		}
+
+		if (isAuthenticated) {
 			next();
 		} else {
 			res.send('<h1>Authentication error.</h1><p>For access, please login with your FT account</p>');
@@ -125,6 +101,7 @@ let authS3ONoRedirect = function (req, res, next) {
 	res.clearCookie('s3o_token');
 	res.status(403);
 	res.send('Forbidden');
+
 	return false;
 }
 
@@ -132,5 +109,4 @@ let authS3ONoRedirect = function (req, res, next) {
 module.exports = authS3O;
 module.exports.authS3ONoRedirect = authS3ONoRedirect;
 module.exports.validate = validate;
-module.exports.ready = s3oPublicKey({ promise: true })
-	.then(function () { return true; });
+module.exports.ready = s3oPublicKeyPromise.then(function () { return true; });

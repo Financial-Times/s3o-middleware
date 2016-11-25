@@ -13,13 +13,7 @@ const proxyquire = require('proxyquire');
 chai.should();
 chai.use(sinonChai);
 
-const publicKeyStub = sinon.stub();
-publicKeyStub.returns(Promise.resolve('test-public-key'));
-
 const validatorStub = sinon.stub();
-
-const validateFactoryStub = sinon.stub();
-validateFactoryStub.returns(validatorStub);
 
 const nextStub = sinon.stub();
 nextStub.returns('next returned');
@@ -30,8 +24,6 @@ describe('s3o-middleware', () => {
   let s3o;
 
   beforeEach(() => {
-    publicKeyStub.reset();
-    validateFactoryStub.reset();
     validatorStub.reset();
     nextStub.reset();
 
@@ -61,8 +53,9 @@ describe('s3o-middleware', () => {
     };
 
     s3o = proxyquire('../', {
-      './lib/publickey': () => publicKeyStub,
-      './lib/validate': validateFactoryStub,
+      's3o-middleware-utils/authenticate': {
+				authenticateToken: validatorStub,
+			},
     });
   });
 
@@ -158,26 +151,10 @@ describe('s3o-middleware', () => {
       s3o.authS3ONoRedirect(reqFixture, resFixture, nextStub);
 
       nextStub.should.not.have.been.called;
-      resFixture.clearCookie.withArgs('s3o_username').should.have.been.calledTwice;
-      resFixture.clearCookie.withArgs('s3o_token').should.have.been.calledTwice;
-      resFixture.status.withArgs(403).should.have.been.calledTwice;
+      resFixture.clearCookie.withArgs('s3o_username').should.have.been.calledOnce;
+      resFixture.clearCookie.withArgs('s3o_token').should.have.been.calledOnce;
+      resFixture.status.withArgs(403).should.have.been.calledOnce;
       resFixture.send.withArgs('Forbidden').should.have.been.calledOnce;
-    });
-  });
-
-  describe('ready property', () => {
-    it('returns true when supplied promise resolves', done => {
-      publicKeyStub.should.have.been.calledOnce;
-      s3o.ready.then(res => {
-        res.should.equal(true);
-        done();
-      });
-    });
-  });
-
-  describe('validate property', () => {
-    it('is the same validator imported from lib/validate', () => {
-      s3o.validate.should.equal(validatorStub);
     });
   });
 });
