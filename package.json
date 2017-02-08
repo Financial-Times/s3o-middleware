@@ -23,9 +23,9 @@
   },
   "homepage": "https://github.com/Financial-Times/S3O-middleware#readme",
   "dependencies": {
+    "@financial-times/s3o-middleware-utils": "^1.0.0",
     "body-parser": "^1.14.1",
-    "debug": "^2.2.0",
-    "s3o-middleware-utils": "github:financial-times/s3o-middleware-utils"
+    "debug": "^2.2.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
