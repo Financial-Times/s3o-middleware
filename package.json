@@ -1,6 +1,6 @@
 {
   "name": "s3o-middleware",
-  "version": "1.8.0",
+  "version": "2.0.0",
   "description": "Authenticate with S3O via middleware",
   "main": "index.js",
   "scripts": {
@@ -23,11 +23,9 @@
   },
   "homepage": "https://github.com/Financial-Times/S3O-middleware#readme",
   "dependencies": {
+    "@financial-times/s3o-middleware-utils": "^1.0.0",
     "body-parser": "^1.14.1",
-    "cookie": "^0.2.2",
-    "debug": "^2.2.0",
-    "ft-poller": "^2.1.0",
-    "node-rsa": "^0.2.25"
+    "debug": "^2.2.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
