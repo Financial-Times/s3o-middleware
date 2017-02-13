@@ -53,7 +53,7 @@ describe('s3o-middleware', () => {
     };
 
     s3o = proxyquire('../', {
-      's3o-middleware-utils/authenticate': {
+      '@financial-times/s3o-middleware-utils/authenticate': {
 				authenticateToken: validatorStub,
 			},
     });
