@@ -87,7 +87,7 @@ describe('s3o-middleware', () => {
         s3o(reqFixture, resFixture, nextStub);
 
         resFixture.send
-          .withArgs('<h1>Authentication error.</h1><p>For access, please login with your FT account</p>')
+          .withArgs('<h1>Authentication error.</h1><p>For access, please log in with your FT account</p>')
           .should.have.been.calledOnce;
       });
     });
@@ -107,7 +107,7 @@ describe('s3o-middleware', () => {
 
         s3o(reqFixture, resFixture, nextStub);
         nextStub.should.not.have.been.called;
-        resFixture.send.withArgs('<h1>Authentication error.</h1><p>For access, please login with your FT account</p>')
+        resFixture.send.withArgs('<h1>Authentication error.</h1><p>For access, please log in with your FT account</p>')
           .should.have.been.calledOnce;
       });
     });
