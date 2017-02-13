@@ -47,7 +47,7 @@ let authS3O = function (req, res, next) {
 				} else {
 					clearCookies(res);
 					res.status(403);
-					res.send('<h1>Authentication error.</h1><p>For access, please login with your FT account</p>');
+					res.send('<h1>Authentication error.</h1><p>For access, please log in with your FT account</p>');
 				}
 			});
 
@@ -66,7 +66,7 @@ let authS3O = function (req, res, next) {
 		if (isAuthenticated) {
 			next();
 		} else {
-			res.send('<h1>Authentication error.</h1><p>For access, please login with your FT account</p>');
+			res.send('<h1>Authentication error.</h1><p>For access, please log in with your FT account</p>');
 		}
 
 	// Send the user to s3o to authenticate
