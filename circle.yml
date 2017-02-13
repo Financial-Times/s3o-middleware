@@ -1,3 +1,11 @@
 machine:
   node:
     version: 6
+
+deployment:
+  release:
+    tag: /v.*/
+    owner: Financial-Times
+    commands:
+      - npm-prepublish --verbose
+      - npm publish --access public
