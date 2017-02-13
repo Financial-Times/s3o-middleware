@@ -6,8 +6,8 @@
 const debug = require('debug')('middleware:auth:s3o');
 const url = require('url');
 const urlencoded = require('body-parser').urlencoded({extended: true});
-const { authenticateToken, validate, s3oPublicKeyPromise } = require('s3o-middleware-utils/authenticate');
-const { normaliseRequestCookies, setCookies, clearCookies } = require('s3o-middleware-utils/cookies');
+const { authenticateToken, validate, s3oPublicKeyPromise } = require('@financial-times/s3o-middleware-utils/authenticate');
+const { normaliseRequestCookies, setCookies, clearCookies } = require('@financial-times/s3o-middleware-utils/cookies');
 
 let authS3O = function (req, res, next) {
 	debug('S3O: Start.');
