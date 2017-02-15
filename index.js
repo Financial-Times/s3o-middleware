@@ -91,7 +91,7 @@ let authS3ONoRedirect = function (req, res, next) {
 
 	normaliseRequestCookies(req);
 
-	if (req.cookies.s3o_username && req.cookies.s3o_token && authenticateToken(res, req.cookies.s3o_username, req.hostname, req.cookies.s3o_token)) {
+	if (req.cookies.s3o_username && req.cookies.s3o_token && authenticateToken(req.cookies.s3o_username, req.hostname, req.cookies.s3o_token)) {
 		debug('S3O: Authentication succeeded');
 		return next();
 	};
