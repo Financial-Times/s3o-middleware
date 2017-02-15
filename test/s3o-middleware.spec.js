@@ -54,8 +54,8 @@ describe('s3o-middleware', () => {
 
     s3o = proxyquire('../', {
       '@financial-times/s3o-middleware-utils/authenticate': {
-				authenticateToken: validatorStub,
-			},
+        authenticateToken: validatorStub,
+      },
     });
   });
 
@@ -74,6 +74,7 @@ describe('s3o-middleware', () => {
 
         s3o(reqFixture, resFixture, nextStub);
 
+        validatorStub.withArgs('test', 'localhost', 'abc123').should.have.been.calledOnce;
         resFixture.header.withArgs('Cache-Control', 'private, no-cache, no-store, must-revalidate')
           .should.have.been.calledOnce;
         resFixture.header.withArgs('Pragma', 'no-cache').should.have.been.calledOnce;
@@ -86,6 +87,7 @@ describe('s3o-middleware', () => {
 
         s3o(reqFixture, resFixture, nextStub);
 
+        validatorStub.withArgs('test', 'localhost', 'test-test-123').should.have.been.calledOnce;
         resFixture.send
           .withArgs('<h1>Authentication error.</h1><p>For access, please log in with your FT account</p>')
           .should.have.been.calledOnce;
@@ -98,6 +100,8 @@ describe('s3o-middleware', () => {
         validatorStub.returns(true);
 
         s3o(reqFixture, resFixture, nextStub);
+
+        validatorStub.withArgs('test', 'localhost', 'test-test-123').should.have.been.calledOnce;
         nextStub.should.have.been.calledOnce;
       });
 
@@ -106,6 +110,8 @@ describe('s3o-middleware', () => {
         validatorStub.returns(false);
 
         s3o(reqFixture, resFixture, nextStub);
+
+        validatorStub.withArgs('test', 'localhost', 'test-test-123').should.have.been.calledOnce;
         nextStub.should.not.have.been.called;
         resFixture.send.withArgs('<h1>Authentication error.</h1><p>For access, please log in with your FT account</p>')
           .should.have.been.calledOnce;
@@ -141,6 +147,7 @@ describe('s3o-middleware', () => {
 
       const result = s3o.authS3ONoRedirect(reqFixture, resFixture, nextStub);
 
+      validatorStub.withArgs('test', 'localhost', 'test-test-123').should.have.been.calledOnce;
       nextStub.should.have.been.calledOnce;
       result.should.equal('next returned');
     });
@@ -150,6 +157,7 @@ describe('s3o-middleware', () => {
 
       s3o.authS3ONoRedirect(reqFixture, resFixture, nextStub);
 
+      validatorStub.withArgs('test', 'localhost', 'test-test-123').should.have.been.calledOnce;
       nextStub.should.not.have.been.called;
       resFixture.clearCookie.withArgs('s3o_username').should.have.been.calledOnce;
       resFixture.clearCookie.withArgs('s3o_token').should.have.been.calledOnce;
