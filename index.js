@@ -1,3 +1,5 @@
+'use strict';
+
 // The Staff Single Sign On (S3O) public key is available at https://s3o.ft.com/publickey.
 //  — S3O validates only @ft.com google accounts (and a whitelist of non-ft.com accounts).
 //  — It's intended to change sporadically and without warning, mainly for security testing.
