@@ -56,3 +56,14 @@ var authS3ONoRedirect = require('s3o-middleware').authS3ONoRedirect;
 
 app.get('/some-authenticated-api', authS3ONoRedirect, router);
 ```
+
+If your application terminates https at a LoadBalancer or some other proxy, S3O will try to
+redirect to the http version. You can override this by adding express middleware
+to force the protocol of the redirect url.
+
+```js
+app.use('/', function (req, res, next) {
+    req.headers['x-forwarded-proto'] = 'https';
+    next();
+});
+```
