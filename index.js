@@ -76,14 +76,14 @@ let authS3O = function (req, res, next) {
 		const s3o_system_code = req.headers['x-s3o-systemcode'];
 		const protocol = (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === 'https') ? 'https' : req.protocol;
 		const originalLocation = protocol + '://' + req.headers.host + req.originalUrl;
-		const s3o_url_v3 = 'https://s3o.ft.com/v2/authenticate?post=true&host=' + encodeURIComponent(req.hostname) + '&redirect=' + encodeURIComponent(originalLocation);
+		const s3o_url_v2 = 'https://s3o.ft.com/v2/authenticate?post=true&host=' + encodeURIComponent(req.hostname) + '&redirect=' + encodeURIComponent(originalLocation);
 		let s3o_url_v4 = 'https://s3ov4.in.ft.com/v2/authenticate?post=true&host=' + encodeURIComponent(req.hostname) + '&redirect=' + encodeURIComponent(originalLocation);
 
 		if (s3o_system_code) {
 			s3o_url_v4 += '&systemcode='+ encodeURIComponent(s3o_system_code);
 		}
 
-		const s3o_url = req.headers['x-s3o-version'] === 'v4' ? s3o_url_v4 : s3o_url_v3;
+		const s3o_url = req.headers['x-s3o-version'] === 'v4' ? s3o_url_v4 : s3o_url_v2;
 
 		debug('S3O: No token/s3o_username found. Redirecting to ' + s3o_url);
 
