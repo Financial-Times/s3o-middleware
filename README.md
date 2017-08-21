@@ -67,3 +67,14 @@ app.use('/', function (req, res, next) {
     next();
 });
 ```
+
+### Upgrade to s3o version 4
+
+Set `x-s3o-version` header to 'v4' and optionally pass a system-code header `x-s3o-systemcode`
+```js
+app.use('/', function (req, res, next) {
+    req.headers['x-s3o-version'] = 'v4';
+    req.headers['x-s3o-systemcode'] = 'your-system-code';
+    next();
+});
+```
