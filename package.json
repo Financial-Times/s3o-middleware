@@ -25,15 +25,15 @@
   "dependencies": {
     "@financial-times/s3o-middleware-utils": "^1.0.0",
     "body-parser": "^1.14.1",
-    "debug": "^2.2.0"
+    "debug": "^3.1.0"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
-    "eslint": "^3.10.2",
-    "mocha": "^3.1.2",
+    "chai": "^4.1.2",
+    "eslint": "^4.9.0",
+    "mocha": "^4.0.1",
     "npm-prepublish": "^1.2.3",
     "proxyquire": "^1.7.10",
-    "sinon": "^1.17.6",
+    "sinon": "^4.0.1",
     "sinon-chai": "^2.8.0"
   }
 }

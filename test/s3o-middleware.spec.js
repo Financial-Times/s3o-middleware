@@ -44,8 +44,8 @@ describe('s3o-middleware', () => {
 	];
 
 	beforeEach(() => {
-		validatorStub.reset();
-		nextStub.reset();
+		validatorStub.resetHistory();
+		nextStub.resetHistory();
 
 		// Reset overridden fixtures
 		reqFixture = {
