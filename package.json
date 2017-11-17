@@ -3,9 +3,6 @@
   "version": "0.0.0",
   "description": "Authenticate with S3O via middleware",
   "main": "index.js",
-  "scripts": {
-    "test": "mocha test/**/*.spec.js"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Financial-Times/S3O-middleware.git"
@@ -28,6 +25,7 @@
     "debug": "^3.1.0"
   },
   "devDependencies": {
+    "@financial-times/origami-service-makefile": "^6.0.1",
     "chai": "^4.1.2",
     "eslint": "^4.9.0",
     "mocha": "^3.5.3",
