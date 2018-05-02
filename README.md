@@ -18,7 +18,7 @@ var express = require('express');
 var app = express();
 
 // Add routes here which don't require auth
-var authS3O = require('s3o-middleware');
+var authS3O = require('@financial-times/s3o-middleware');
 app.use(authS3O);
 // Add routes here which require auth
 ```
@@ -27,7 +27,7 @@ If only paths within a given directory require auth:
 var express = require('express');
 var app = express();
 var router = express.Router();
-var authS3O = require('s3o-middleware');
+var authS3O = require('@financial-times/s3o-middleware');
 router.use(authS3O);
 app.use('/admin', router);
 ```
@@ -36,7 +36,7 @@ If specific paths require auth:
 var express = require('express');
 var app = express();
 var router = express.Router();
-var authS3O = require('s3o-middleware');
+var authS3O = require('@financial-times/s3o-middleware');
 
 app.get('/', authS3O, router);
 app.post('/', authS3O);
@@ -52,7 +52,7 @@ middleware will respond with a simple `403: Forbidden` response:
 var express = require('express');
 var app = express();
 var router = express.Router();
-var authS3ONoRedirect = require('s3o-middleware').authS3ONoRedirect;
+var authS3ONoRedirect = require('@financial-times/s3o-middleware').authS3ONoRedirect;
 
 app.get('/some-authenticated-api', authS3ONoRedirect, router);
 ```
