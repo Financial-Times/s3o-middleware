@@ -53,6 +53,10 @@ jobs:
       - *attach_workspace
 
       - run:
+          name: Update npm to include npx
+          command: sudo npm i -g npm@^5
+
+      - run:
           name: Run tests
           command: make ci
 
