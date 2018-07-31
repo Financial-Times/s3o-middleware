@@ -29,6 +29,11 @@ references:
     tags:
       only: /^v.*$/
 
+  update_npm: &update_npm
+    run:
+      name: Update npm to include npx
+      command: sudo npm i -g npm@^5
+
 jobs:
   install:
     <<: *default_container_config
@@ -51,10 +56,7 @@ jobs:
     <<: *default_container_config
     steps:
       - *attach_workspace
-
-      - run:
-          name: Update npm to include npx
-          command: sudo npm i -g npm@^5
+      - *update_npm
 
       - run:
           name: Run tests
@@ -64,6 +66,7 @@ jobs:
     <<: *default_container_config
     steps:
       - *attach_workspace
+      - *update_npm
 
       - run:
           name: Setup npm credentials
