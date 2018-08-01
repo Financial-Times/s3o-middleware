@@ -80,8 +80,12 @@ workflows:
   version: 2
   build-and-release:
     jobs:
-      - install
+      - install:
+          filters:
+            <<: *only_version_tags
       - test:
+          filters:
+            <<: *only_version_tags
           requires:
             - install
       - release_npm:
