@@ -32,6 +32,7 @@
     "npm-prepublish": "^1.2.3",
     "proxyquire": "^1.7.10",
     "sinon": "^4.0.1",
-    "sinon-chai": "^2.8.0"
+    "sinon-chai": "^2.8.0",
+    "whitesource": "^18.7.2"
   }
 }
