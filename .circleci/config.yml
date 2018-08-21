@@ -11,13 +11,13 @@ references:
       at: ~/project
 
   npm_cache_key: &npm_cache_key
-    v1-dependency-npm-{{ checksum "package-lock.json" }}
+    v3-dependency-npm-{{ checksum "package-lock.json" }}
 
   restore_node_modules: &restore_node_modules
     restore_cache:
       keys:
         - *npm_cache_key
-        - v1-dependency-npm-
+        - v3-dependency-npm-
 
   cache_node_modules: &cache_node_modules
     save_cache:
