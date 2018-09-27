@@ -1,6 +1,6 @@
 {
   "name": "@financial-times/s3o-middleware",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Authenticate with S3O via middleware",
   "main": "index.js",
   "repository": {
