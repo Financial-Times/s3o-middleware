@@ -1,0 +1,98 @@
+version: 2.1
+
+executors:
+  node:
+    docker:
+      - image: circleci/node:6.14
+
+references:
+  attach_workspace: &attach_workspace
+    attach_workspace:
+      at: ~/project
+
+  npm_cache_key: &npm_cache_key
+    v3-dependency-npm-{{ checksum "package-lock.json" }}
+
+  restore_node_modules: &restore_node_modules
+    restore_cache:
+      keys:
+        - *npm_cache_key
+        - v3-dependency-npm-
+
+  cache_node_modules: &cache_node_modules
+    save_cache:
+      key: *npm_cache_key
+      paths:
+        - ./node_modules/
+
+  only_version_tags: &only_version_tags
+    tags:
+      only: /^v.*$/
+
+  update_npm: &update_npm
+    run:
+      name: Update npm to include npx
+      command: sudo npm i -g npm@^6
+
+jobs:
+  install:
+    executor: node
+    steps:
+      - checkout
+
+      - *restore_node_modules
+      - run:
+          name: Install dependencies
+          command: npm install --no-save
+
+      - *cache_node_modules
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  test:
+    executor: node
+    steps:
+      - *attach_workspace
+      - *update_npm
+
+      - run:
+          name: Run tests
+          command: make ci
+
+  release_npm:
+    executor: node
+    steps:
+      - *attach_workspace
+      - *update_npm
+
+      - run:
+          name: Setup npm credentials
+          command: echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ${HOME}/.npmrc
+
+      - run:
+          name: Publish npm package
+          command: make npm-publish
+
+workflows:
+  version: 2.1
+  build-and-release:
+    jobs:
+      - install:
+          filters:
+            <<: *only_version_tags
+      - test:
+          filters:
+            <<: *only_version_tags
+          requires:
+            - install
+      - release_npm:
+          requires:
+            - install
+            - test
+          filters:
+            <<: *only_version_tags
+            branches:
+              ignore: /.*/
