@@ -22,17 +22,16 @@
   "dependencies": {
     "@financial-times/s3o-middleware-utils": "^1.1.1",
     "body-parser": "^1.14.1",
-    "debug": "^4.0.1"
+    "debug": "^4.1.1"
   },
   "devDependencies": {
-    "@financial-times/origami-service-makefile": "^6.0.1",
+    "@financial-times/origami-service-makefile": "^6.4.0",
     "chai": "^4.1.2",
-    "eslint": "^4.9.0",
+    "eslint": "^5.12.0",
     "mocha": "^5.2.0",
     "npm-prepublish": "^1.2.3",
-    "proxyquire": "^1.7.10",
-    "sinon": "^4.0.1",
-    "sinon-chai": "^2.8.0",
-    "whitesource": "^18.7.2"
+    "proxyquire": "^2.1.0",
+    "sinon": "^7.2.2",
+    "sinon-chai": "^3.3.0"
   }
 }
