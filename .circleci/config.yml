@@ -3,7 +3,7 @@ version: 2.1
 executors:
   node:
     docker:
-      - image: circleci/node:6.14
+      - image: circleci/node:latest
 
 references:
   attach_workspace: &attach_workspace
