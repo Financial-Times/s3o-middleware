@@ -75,7 +75,7 @@ let authS3O = function (req, res, next) {
 	} else {
 		const s3o_system_code = req.headers['x-s3o-systemcode'];
 		const protocol = (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === 'https') ? 'https' : req.protocol;
-		const originalLocation = protocol + '://' + req.headers.host + req.originalUrl;
+		const originalLocation = protocol + '://' + req.hostname + req.originalUrl;
 		const s3o_url_v2 = 'https://s3o.ft.com/v2/authenticate?post=true&host=' + encodeURIComponent(req.hostname) + '&redirect=' + encodeURIComponent(originalLocation);
 		let s3o_url_v4 = 'https://s3ov4.in.ft.com/v2/authenticate?post=true&host=' + encodeURIComponent(req.hostname) + '&redirect=' + encodeURIComponent(originalLocation);
 
