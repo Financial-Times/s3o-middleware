@@ -6,7 +6,10 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Financial-Times/S3O-middleware.git"
-  },
+	},
+	"engines": {
+		"node": ">=8"
+	},
   "keywords": [
     "express",
     "s3o",
@@ -20,18 +23,19 @@
   },
   "homepage": "https://github.com/Financial-Times/S3O-middleware#readme",
   "dependencies": {
-    "@financial-times/s3o-middleware-utils": "^1.1.1",
+    "@financial-times/s3o-middleware-utils": "^2.0.0",
     "body-parser": "^1.14.1",
+    "cookie": "^0.3.1",
     "debug": "^4.1.1"
   },
   "devDependencies": {
     "@financial-times/origami-service-makefile": "^6.4.0",
-    "chai": "^4.1.2",
-    "eslint": "^5.12.0",
-    "mocha": "^5.2.0",
+    "chai": "^4.2.0",
+    "eslint": "^5.15.3",
+    "mocha": "^6.0.2",
     "npm-prepublish": "^1.2.3",
     "proxyquire": "^2.1.0",
-    "sinon": "^7.2.2",
+    "sinon": "^7.3.0",
     "sinon-chai": "^3.3.0"
   }
 }
