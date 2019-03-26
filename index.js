@@ -6,12 +6,17 @@
 //  — Currently it comes in DER format and needs to be converted to PEM format
 
 const debug = require('debug')('middleware:auth:s3o');
+const querystring = require('querystring');
 const url = require('url');
 const urlencoded = require('body-parser').urlencoded({extended: true});
-const { authenticateToken, validate, s3oPublicKeyPromise } = require('@financial-times/s3o-middleware-utils/authenticate');
-const { normaliseRequestCookies, setCookies, clearCookies } = require('@financial-times/s3o-middleware-utils/cookies');
+const { authenticate, publickey, cookies } = require('@financial-times/s3o-middleware-utils');
+const { getUsername, getToken, normaliseRequestCookies, setCookies, clearCookies } = require('./lib/cookies');
 
-let authS3O = function (req, res, next) {
+const { USERNAME: S3O_USERNAME_COOKIE } = cookies;
+const publicKeyPoller = publickey.poller(debug);
+const { authenticateToken, validate } = authenticate(publickey.poller(debug));
+
+const authS3O = function (req, res, next) {
 	debug('S3O: Start.');
 
 	normaliseRequestCookies(req);
@@ -20,7 +25,7 @@ let authS3O = function (req, res, next) {
 	// These parameters come from https://s3o.ft.com. It redirects back after it does the google authentication.
 	if (req.method === 'POST' && req.query.username) {
 		urlencoded(req, res, function () {
-				debug('S3O: Found parameter token for s3o_username: ' + req.query.username);
+				debug(`S3O: Found parameter token for ${S3O_USERNAME_COOKIE}: ${req.query.username}`);
 				let isAuthenticated;
 				try {
 					isAuthenticated = authenticateToken(req.query.username, req.hostname, req.body.token);
@@ -54,12 +59,12 @@ let authS3O = function (req, res, next) {
 			});
 
 	// Check for s3o username/token cookies
-	} else if (req.cookies.s3o_username && req.cookies.s3o_token) {
-		debug('S3O: Found cookie token for s3o_username: ' + req.cookies.s3o_username);
+	} else if (getUsername(req) && getToken(req)) {
+		debug(`S3O: Found cookie token for ${S3O_USERNAME_COOKIE}: ${getUsername(req)}`);
 
 		let isAuthenticated;
 		try {
-			isAuthenticated = authenticateToken(req.cookies.s3o_username, req.hostname, req.cookies.s3o_token);
+			isAuthenticated = authenticateToken(getUsername(req), req.hostname, getToken(req));
 		} catch(e) {
 			res.status(500).send(e);
 			return;
@@ -76,8 +81,13 @@ let authS3O = function (req, res, next) {
 		const s3o_system_code = req.headers['x-s3o-systemcode'];
 		const protocol = (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === 'https') ? 'https' : req.protocol;
 		const originalLocation = protocol + '://' + req.hostname + req.originalUrl;
-		const s3o_url_v2 = 'https://s3o.ft.com/v2/authenticate?post=true&host=' + encodeURIComponent(req.hostname) + '&redirect=' + encodeURIComponent(originalLocation);
-		let s3o_url_v4 = 'https://s3ov4.in.ft.com/v2/authenticate?post=true&host=' + encodeURIComponent(req.hostname) + '&redirect=' + encodeURIComponent(originalLocation);
+		const parameters = querystring.stringify({
+			post: true,
+			host: req.hostname,
+			redirect: originalLocation,
+		});
+		const s3o_url_v2 = `https://s3o.ft.com/v2/authenticate?${parameters}`;
+		let s3o_url_v4 = `https://s3ov4.in.ft.com/v2/authenticate?${parameters}`;
 
 		if (s3o_system_code) {
 			s3o_url_v4 += '&systemcode='+ encodeURIComponent(s3o_system_code);
@@ -85,7 +95,7 @@ let authS3O = function (req, res, next) {
 
 		const s3o_url = req.headers['x-s3o-version'] === 'v4' ? s3o_url_v4 : s3o_url_v2;
 
-		debug('S3O: No token/s3o_username found. Redirecting to ' + s3o_url);
+		debug(`S3O: No token/${S3O_USERNAME_COOKIE} found. Redirecting to ${s3o_url}`);
 
 		// Don't cache any redirection responses.
 		res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
@@ -98,20 +108,21 @@ let authS3O = function (req, res, next) {
 // Alternative authentication middleware which does not redirect to S3O when
 // cookies are missing or invalid. This can be used in front of API calls
 // where a redirect will be undesirable
-let authS3ONoRedirect = function (req, res, next) {
+const authS3ONoRedirect = function (req, res, next) {
 	debug('S3O: Start.');
 
 	normaliseRequestCookies(req);
 
-	if (req.cookies.s3o_username && req.cookies.s3o_token && authenticateToken(req.cookies.s3o_username, req.hostname, req.cookies.s3o_token)) {
+	const username = getUsername(req);
+	const token = getToken(req);
+
+	if (username && token && authenticateToken(username, req.hostname, token)) {
 		debug('S3O: Authentication succeeded');
 		return next();
 	};
 
 	debug('S3O: Authentication failed');
-	res.clearCookie('s3o_username');
-	res.clearCookie('s3o_token');
-	res.status(403);
+	clearCookies(res);
 	res.send('Forbidden');
 
 	return false;
@@ -121,4 +132,4 @@ let authS3ONoRedirect = function (req, res, next) {
 module.exports = authS3O;
 module.exports.authS3ONoRedirect = authS3ONoRedirect;
 module.exports.validate = validate;
-module.exports.ready = s3oPublicKeyPromise.then(function () { return true; });
+module.exports.ready = publicKeyPoller({ promise: true }).then(() => true);
