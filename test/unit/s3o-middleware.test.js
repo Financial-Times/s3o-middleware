@@ -27,7 +27,7 @@ describe('s3o-middleware', () => {
 			version: 'v3',
 			options: {
 				requestHeader: {},
-				redirectLocation: 'https://s3o.ft.com/v2/authenticate?post=true&host=localhost&redirect=https%3A%2F%2Flocalhosthttp%3A%2F%2Flocalhost'
+				redirectLocation: 'https://s3o.ft.com/v2/authenticate?post=true&host=localhost&redirect=https%3A%2F%2Flocalhost%2F'
 			}
 		},
 		{
@@ -37,7 +37,7 @@ describe('s3o-middleware', () => {
 					'x-s3o-version': 'v4',
 					'x-s3o-systemcode': 'system-code'
 				},
-				redirectLocation: 'https://s3ov4.in.ft.com/v2/authenticate?post=true&host=localhost&redirect=https%3A%2F%2Flocalhosthttp%3A%2F%2Flocalhost&systemcode=system-code'
+				redirectLocation: 'https://s3ov4.in.ft.com/v2/authenticate?post=true&host=localhost&redirect=https%3A%2F%2Flocalhost%2F&systemcode=system-code'
 			}
 		}
 	];
@@ -77,7 +77,7 @@ describe('s3o-middleware', () => {
 			redirect: sandbox.stub(),
 		};
 
-		s3o = proxyquire('../', {
+		s3o = proxyquire('../../', {
 			'@financial-times/s3o-middleware-utils': {
 				publickey: {
 					poller: () => pollerStub,
@@ -126,7 +126,9 @@ describe('s3o-middleware', () => {
 					reqFixture.body = {
 						token: 'abc123',
 					};
-					reqFixture.originalUrl = 'http://localhost';
+					reqFixture.protocol = 'http';
+					reqFixture.hostname = 'localhost';
+					reqFixture.originalUrl = '/';
 
 					s3o(reqFixture, resFixture, nextStub);
 
@@ -135,7 +137,7 @@ describe('s3o-middleware', () => {
 						.should.have.been.calledOnce;
 					resFixture.header.withArgs('Pragma', 'no-cache').should.have.been.calledOnce;
 					resFixture.header.withArgs('Expires', 0).should.have.been.calledOnce;
-					resFixture.redirect.withArgs('http://localhost/').should.have.been.calledOnce;
+					resFixture.redirect.withArgs('/').should.have.been.calledOnce;
 				});
 
 				it('responds with error message if authentication fails', () => {
@@ -181,8 +183,9 @@ describe('s3o-middleware', () => {
 					delete reqFixture.method;
 					reqFixture.headers.host = 'localhost';
 					reqFixture.headers = Object.assign(reqFixture.headers, run.options.requestHeader);
-					reqFixture.originalUrl = 'http://localhost';
 					reqFixture.protocol = 'https';
+					reqFixture.hostname = 'localhost';
+					reqFixture.originalUrl = '/';
 					resFixture.redirect.returns('redirect returned');
 
 					const result = s3o(reqFixture, resFixture, nextStub);
@@ -196,6 +199,7 @@ describe('s3o-middleware', () => {
 					result.should.equal('redirect returned');
 				});
 			});
+
 		});
 
 		describe('no redirect authentication',() => {
