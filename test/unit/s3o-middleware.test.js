@@ -77,7 +77,7 @@ describe('s3o-middleware', () => {
 			redirect: sandbox.stub(),
 		};
 
-		s3o = proxyquire('../', {
+		s3o = proxyquire('../../', {
 			'@financial-times/s3o-middleware-utils': {
 				publickey: {
 					poller: () => pollerStub,
@@ -196,6 +196,7 @@ describe('s3o-middleware', () => {
 					result.should.equal('redirect returned');
 				});
 			});
+
 		});
 
 		describe('no redirect authentication',() => {
