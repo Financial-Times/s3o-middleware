@@ -36,6 +36,7 @@ const authS3O = function (req, res, next) {
 
 				if (isAuthenticated) {
 					setCookies(res, req.query.username, req.body.token);
+
 					// Strip the username and token from the URL (but keep any other parameters)
 					// Set 2nd parameter to true to parse the query string (so we can easily delete ?username=)
 					let cleanURL = url.parse(req.originalUrl, true);
@@ -50,6 +51,7 @@ const authS3O = function (req, res, next) {
 					res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
 					res.header('Pragma', 'no-cache');
 					res.header('Expires', 0);
+
 					res.redirect(url.format(cleanURL));
 				} else {
 					clearCookies(res);
@@ -80,7 +82,25 @@ const authS3O = function (req, res, next) {
 	} else {
 		const s3o_system_code = req.headers['x-s3o-systemcode'];
 		const protocol = (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === 'https') ? 'https' : req.protocol;
-		const originalLocation = protocol + '://' + req.hostname + req.originalUrl;
+
+		// Get the original port, either from the proxy or by
+		// splitting it out from the hostname
+		const originalPort = req.headers['x-forwarded-port'] || (
+			req.get('host').includes(':') ?
+			req.get('host').split(':').pop() :
+			undefined
+		);
+
+		// Environments like Heroku send a forwarded port even if it's one
+		// of the defaults, like 80 or 443. We need to ignore these
+		const hostWithPort = req.hostname + (
+			originalPort && originalPort !== '80' && originalPort !== '443' ?
+			`:${originalPort}` :
+			''
+		);
+
+		const originalLocation = protocol + '://' + hostWithPort + req.originalUrl;
+
 		const parameters = querystring.stringify({
 			post: true,
 			host: req.hostname,

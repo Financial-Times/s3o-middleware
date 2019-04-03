@@ -27,7 +27,8 @@ describe('s3o-middleware', () => {
 			version: 'v3',
 			options: {
 				requestHeader: {},
-				redirectLocation: 'https://s3o.ft.com/v2/authenticate?post=true&host=localhost&redirect=https%3A%2F%2Flocalhost%2F'
+				redirectLocation: 'https://s3o.ft.com/v2/authenticate?post=true&host=localhost&redirect=https%3A%2F%2Flocalhost%2F',
+				redirectLocationWithPort: 'https://s3o.ft.com/v2/authenticate?post=true&host=localhost&redirect=https%3A%2F%2Flocalhost%3A1234%2F'
 			}
 		},
 		{
@@ -37,7 +38,8 @@ describe('s3o-middleware', () => {
 					'x-s3o-version': 'v4',
 					'x-s3o-systemcode': 'system-code'
 				},
-				redirectLocation: 'https://s3ov4.in.ft.com/v2/authenticate?post=true&host=localhost&redirect=https%3A%2F%2Flocalhost%2F&systemcode=system-code'
+				redirectLocation: 'https://s3ov4.in.ft.com/v2/authenticate?post=true&host=localhost&redirect=https%3A%2F%2Flocalhost%2F&systemcode=system-code',
+				redirectLocationWithPort: 'https://s3ov4.in.ft.com/v2/authenticate?post=true&host=localhost&redirect=https%3A%2F%2Flocalhost%3A1234%2F&systemcode=system-code'
 			}
 		}
 	];
@@ -58,6 +60,7 @@ describe('s3o-middleware', () => {
 				[cookies.USERNAME]: 'test',
 				[cookies.TOKEN]: 'test-test-123',
 			},
+			get: sandbox.stub().withArgs('host').returns('localhost'),
 			hostname: 'localhost',
 			headers: {
 				'transfer-encoding': 'utf8'
@@ -177,10 +180,14 @@ describe('s3o-middleware', () => {
 			});
 
 			describe('when user is unauthenticated', () => {
-				it('redirects to s3o login URL', () => {
+
+				beforeEach(() => {
 					delete reqFixture.cookies;
 					delete reqFixture.query;
 					delete reqFixture.method;
+				});
+
+				it('redirects to s3o login URL', () => {
 					reqFixture.headers.host = 'localhost';
 					reqFixture.headers = Object.assign(reqFixture.headers, run.options.requestHeader);
 					reqFixture.protocol = 'https';
@@ -198,6 +205,73 @@ describe('s3o-middleware', () => {
 						.should.have.been.calledOnce;
 					result.should.equal('redirect returned');
 				});
+
+				describe('when the request URL has a port', () => {
+					it('includes the port in the s3o redirect', () => {
+						reqFixture.headers.host = 'localhost';
+						reqFixture.headers = Object.assign(reqFixture.headers, run.options.requestHeader);
+						reqFixture.protocol = 'https';
+						reqFixture.hostname = 'localhost';
+						reqFixture.originalUrl = '/';
+						reqFixture.get.withArgs('host').returns('localhost:1234');
+						resFixture.redirect.returns('redirect returned');
+
+						const result = s3o(reqFixture, resFixture, nextStub);
+
+						resFixture.header.withArgs('Cache-Control', 'private, no-cache, no-store, must-revalidate')
+							.should.have.been.calledOnce;
+						resFixture.header.withArgs('Pragma', 'no-cache').should.have.been.calledOnce;
+						resFixture.header.withArgs('Expires', 0).should.have.been.calledOnce;
+						resFixture.redirect.withArgs(run.options.redirectLocationWithPort)
+							.should.have.been.calledOnce;
+						result.should.equal('redirect returned');
+					});
+				});
+
+				describe('when the request URL has a proxy port', () => {
+					it('includes the port in the s3o redirect', () => {
+						reqFixture.headers.host = 'localhost';
+						reqFixture.headers = Object.assign(reqFixture.headers, run.options.requestHeader);
+						reqFixture.protocol = 'https';
+						reqFixture.hostname = 'localhost';
+						reqFixture.originalUrl = '/';
+						reqFixture.headers['x-forwarded-port'] = '1234';
+						resFixture.redirect.returns('redirect returned');
+
+						const result = s3o(reqFixture, resFixture, nextStub);
+
+						resFixture.header.withArgs('Cache-Control', 'private, no-cache, no-store, must-revalidate')
+							.should.have.been.calledOnce;
+						resFixture.header.withArgs('Pragma', 'no-cache').should.have.been.calledOnce;
+						resFixture.header.withArgs('Expires', 0).should.have.been.calledOnce;
+						resFixture.redirect.withArgs(run.options.redirectLocationWithPort)
+							.should.have.been.calledOnce;
+						result.should.equal('redirect returned');
+					});
+				});
+
+				describe('when the request URL has a port that is 80 or 443', () => {
+					it('does not include the port in the s3o redirect', () => {
+						reqFixture.headers.host = 'localhost';
+						reqFixture.headers = Object.assign(reqFixture.headers, run.options.requestHeader);
+						reqFixture.protocol = 'https';
+						reqFixture.hostname = 'localhost';
+						reqFixture.originalUrl = '/';
+						reqFixture.get.withArgs('host').returns('localhost:80');
+						resFixture.redirect.returns('redirect returned');
+
+						const result = s3o(reqFixture, resFixture, nextStub);
+
+						resFixture.header.withArgs('Cache-Control', 'private, no-cache, no-store, must-revalidate')
+							.should.have.been.calledOnce;
+						resFixture.header.withArgs('Pragma', 'no-cache').should.have.been.calledOnce;
+						resFixture.header.withArgs('Expires', 0).should.have.been.calledOnce;
+						resFixture.redirect.withArgs(run.options.redirectLocation)
+							.should.have.been.calledOnce;
+						result.should.equal('redirect returned');
+					});
+				});
+
 			});
 
 		});
